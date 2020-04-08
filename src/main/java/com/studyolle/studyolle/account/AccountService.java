@@ -1,11 +1,18 @@
 package com.studyolle.studyolle.account;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.studyolle.studyolle.domain.Account;
 
@@ -18,12 +25,14 @@ public class AccountService {
 	private final AccountRepository accountRepository;
 	private final JavaMailSender javaMailSender;
 	private final PasswordEncoder passwordEncoder;
-
+	//private final AuthenticationManager authenticationManager;
 	
-	public void processNewAccount(@Valid SignUpForm signUpForm) {
+	@Transactional
+	public Account processNewAccount(@Valid SignUpForm signUpForm) {
 		Account newAccount = saveNewAccount(signUpForm);
 		newAccount.generateEmailCheckToken();
 		sendSignUpConfirmEmail(newAccount);
+		return newAccount;
 	}
 	
 	private Account saveNewAccount(SignUpForm signUpForm) {
@@ -47,6 +56,31 @@ public class AccountService {
 		mailMassage.setSubject("스터디 올래, 회원 가입 인증");
 		mailMassage.setText("/check-email-token?token=" + newAccount.getEmailCheckToken() + "&email=" + newAccount.getEmail());
 		javaMailSender.send(mailMassage);
+	}
+
+	public void login(Account processNewAccount) {
+		// Originally, this is for 'AuthenticationManager' or 'AuthenticationProvider'
+		// So this is the 'right way' to authenticate user from spring boot.
+		
+//		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
+//				processNewAccount.getNickname(),
+//				processNewAccount.getPassword(),
+//				List.of(new SimpleGrantedAuthority("ROLE_USER")));
+//		Authentication authentication = authenticationManager.authenticate(token);
+//		SecurityContext context = SecurityContextHolder.getContext();
+//		context.setAuthentication(authentication);
+		
+		
+		//But we are gonna use this logic, because we can't use 'plain' password for DB.
+		//By skipping 'AuthenticatoinManager', we can use encrypted passsword. 
+		//And actually, this logic flow is almost same as 'AuthenticatoinManager' without password part!
+		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
+				processNewAccount.getNickname(),
+				processNewAccount.getPassword(),
+				List.of(new SimpleGrantedAuthority("ROLE_USER")));
+		
+		SecurityContext context = SecurityContextHolder.getContext();
+		context.setAuthentication(token);
 	}
 
 }

@@ -24,7 +24,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	public void configure(WebSecurity web) throws Exception {
-		web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+		// for static files
+		web.ignoring()
+		.mvcMatchers("/node_modules/**") // for ignoring 'node_module'
+		.requestMatchers(PathRequest.toStaticResources().atCommonLocations()); // for ignoring common 'static' files from security setting.
+
 	}
 	
 	

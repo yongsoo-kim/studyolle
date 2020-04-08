@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import com.studyolle.studyolle.domain.Account;
+
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -19,6 +21,7 @@ public class AccountController {
 
 	private final SignUpFormValidator signUpFormValidator;
 	private final AccountService accountService;
+	private final AccountRepository accountRepository;
 
 
 	@InitBinder("signUpForm")
@@ -39,9 +42,30 @@ public class AccountController {
 			return "account/sign-up";
 		}
 
-		accountService.processNewAccount(signUpForm);
-
+		Account processNewAccount = accountService.processNewAccount(signUpForm);
+		accountService.login(processNewAccount);
 		return "redirect:/";
+	}
+	
+	@GetMapping("/check-email-token")
+	public String checkEmailToken(String token, String email, Model model) {
+		
+		Account account = accountRepository.findByEmail(email);
+		
+		String view = "account/checked-email";
+
+		if(account == null || !account.isValidToken(token)) {
+			model.addAttribute("error", "wrong.email");
+			return view;
+		}
+		
+		account.completeSignUp();
+		accountService.login(account);
+
+		model.addAttribute("numberOfUser", accountRepository.count());
+		model.addAttribute("nickname", account.getNickname());
+		
+		return view;
 	}
 
 }
