@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.studyolle.studyolle.domain.Account;
+import com.studyolle.studyolle.settings.Profile;
 
 import lombok.RequiredArgsConstructor;
 
@@ -107,5 +108,18 @@ public class AccountService implements UserDetailsService {
 		account.completeSignUp();
 		login(account);
 	}
+
+	public void updateProfile(Account account, Profile profile) {
+		account.setUrl(profile.getUrl());
+		account.setOccupation(profile.getOccupation());
+		account.setLocation(profile.getLocation());
+		account.setBio(profile.getBio());
+		// TODO: profile image.
+		
+		
+		//'account' object is detached here, so make it under control of 'Persistence Context'
+		accountRepository.save(account);
+	}
+
 
 }
