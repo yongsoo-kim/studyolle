@@ -22,6 +22,7 @@ import com.studyolle.studyolle.domain.Account;
 import lombok.RequiredArgsConstructor;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class AccountService implements UserDetailsService {
 
@@ -30,7 +31,6 @@ public class AccountService implements UserDetailsService {
 	private final PasswordEncoder passwordEncoder;
 	//private final AuthenticationManager authenticationManager;
 	
-	@Transactional
 	public Account processNewAccount(@Valid SignUpForm signUpForm) {
 		Account newAccount = saveNewAccount(signUpForm);
 		newAccount.generateEmailCheckToken();
@@ -87,6 +87,7 @@ public class AccountService implements UserDetailsService {
 		context.setAuthentication(token);
 	}
 
+	@Transactional(readOnly = true)
 	@Override
 	public UserDetails loadUserByUsername(String emailOrNickName) throws UsernameNotFoundException {
 		Account account = accountRepository.findByEmail(emailOrNickName);
@@ -99,6 +100,12 @@ public class AccountService implements UserDetailsService {
 		}
 		
 		return new UserAccount(account);
+	}
+	
+	
+	public void completeSignUp(Account account) {
+		account.completeSignUp();
+		login(account);
 	}
 
 }
