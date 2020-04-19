@@ -114,10 +114,15 @@ public class AccountService implements UserDetailsService {
 		account.setOccupation(profile.getOccupation());
 		account.setLocation(profile.getLocation());
 		account.setBio(profile.getBio());
-		// TODO: profile image.
+		account.setProfileImage(profile.getProfileImage());
 		
 		
 		//'account' object is detached here, so make it under control of 'Persistence Context'
+		accountRepository.save(account);
+	}
+
+	public void updatePassword(Account account, String newPassword) {
+		account.setPassword(passwordEncoder.encode(newPassword));
 		accountRepository.save(account);
 	}
 
