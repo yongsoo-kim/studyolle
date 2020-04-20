@@ -1,8 +1,6 @@
-package com.studyolle.studyolle.settings;
+package com.studyolle.studyolle.settings.form;
 
 import org.hibernate.validator.constraints.Length;
-
-import com.studyolle.studyolle.domain.Account;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,12 +28,4 @@ public class Profile {
 	private String location;
 	
 	private String profileImage;
-	
-	public Profile(Account account) {
-		this.bio = account.getBio();
-		this.url = account.getUrl();
-		this.occupation = account.getOccupation();
-		this.location = account.getLocation();
-		this.profileImage = account.getProfileImage();
-	}
 }

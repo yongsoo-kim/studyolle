@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,7 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.studyolle.studyolle.domain.Account;
-import com.studyolle.studyolle.settings.Profile;
+import com.studyolle.studyolle.settings.form.Notifications;
+import com.studyolle.studyolle.settings.form.Profile;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,6 +32,8 @@ public class AccountService implements UserDetailsService {
 	private final AccountRepository accountRepository;
 	private final JavaMailSender javaMailSender;
 	private final PasswordEncoder passwordEncoder;
+	private final ModelMapper modelMapper;
+	
 	//private final AuthenticationManager authenticationManager;
 	
 	public Account processNewAccount(@Valid SignUpForm signUpForm) {
@@ -110,13 +114,8 @@ public class AccountService implements UserDetailsService {
 	}
 
 	public void updateProfile(Account account, Profile profile) {
-		account.setUrl(profile.getUrl());
-		account.setOccupation(profile.getOccupation());
-		account.setLocation(profile.getLocation());
-		account.setBio(profile.getBio());
-		account.setProfileImage(profile.getProfileImage());
 		
-		
+		modelMapper.map(profile, account);
 		//'account' object is detached here, so make it under control of 'Persistence Context'
 		accountRepository.save(account);
 	}
@@ -126,5 +125,25 @@ public class AccountService implements UserDetailsService {
 		accountRepository.save(account);
 	}
 
+	public void updateNotifications(Account account, Notifications notifications) {
+		
+		modelMapper.map(notifications, account);
+		
+		accountRepository.save(account);
+	}
 
+	public void updateNickName(Account account, String nickname) {
+		account.setNickname(nickname);
+		accountRepository.save(account);
+		login(account);
+	}
+
+	public void sendLoginLink(Account account) {
+		account.generateEmailCheckToken();
+		SimpleMailMessage mailMessage = new SimpleMailMessage();
+		mailMessage.setTo(account.getEmail());
+		mailMessage.setSubject("스터디 올래, 로그인 링크");
+		mailMessage.setText("/login-by-email?token="+account.getEmailCheckToken()+"&email="+account.getEmail());
+		javaMailSender.send(mailMessage);
+	}
 }
