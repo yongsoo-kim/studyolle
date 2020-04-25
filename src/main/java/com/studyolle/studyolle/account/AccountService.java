@@ -1,9 +1,13 @@
 package com.studyolle.studyolle.account;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import javax.validation.Valid;
 
+import com.studyolle.studyolle.domain.Tag;
+import com.studyolle.studyolle.domain.Zone;
 import org.modelmapper.ModelMapper;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -38,22 +42,15 @@ public class AccountService implements UserDetailsService {
 	
 	public Account processNewAccount(@Valid SignUpForm signUpForm) {
 		Account newAccount = saveNewAccount(signUpForm);
-		newAccount.generateEmailCheckToken();
 		sendSignUpConfirmEmail(newAccount);
 
 		return newAccount;
 	}
 	
 	private Account saveNewAccount(SignUpForm signUpForm) {
-		Account account = Account.builder()
-				.email(signUpForm.getEmail())
-				.nickname(signUpForm.getNickname())
-				.password(passwordEncoder.encode(signUpForm.getPassword()))
-				.studyCreatedByWeb(true)
-				.studyEnrollmentResultByWeb(true)
-				.studyUpdatedByWeb(true)
-				.build();
-
+		signUpForm.setPassword(passwordEncoder.encode(signUpForm.getPassword()));
+		Account account = modelMapper.map(signUpForm, Account.class);
+		account.generateEmailCheckToken();
 		Account newAccount = accountRepository.save(account);
 		return newAccount;
 	}
@@ -145,5 +142,39 @@ public class AccountService implements UserDetailsService {
 		mailMessage.setSubject("스터디 올래, 로그인 링크");
 		mailMessage.setText("/login-by-email?token="+account.getEmailCheckToken()+"&email="+account.getEmail());
 		javaMailSender.send(mailMessage);
+	}
+
+    public void addTag(Account account, Tag tag) {
+		// Here,  'account' is now in 'detached' status.
+		// And... **toMany can't use Lazy loading. -> 'Tag' will be null!
+		// ** TIP**
+		// Only 'persist' status can make us use Lazy loading again -> we need to change the status.
+		Optional<Account> byId = accountRepository.findById(account.getId()); // This is Eager loading. And  'accountRepository.getOne()' is Lazy loading.
+		byId.ifPresent(a -> a.getTags().add(tag));
+	}
+
+	public Set<Tag> getTags(Account account) {
+		Optional<Account> byId = accountRepository.findById(account.getId());
+		return byId.orElseThrow().getTags();
+	}
+
+	public void removeTag(Account account, Tag tag) {
+		Optional<Account> byId = accountRepository.findById(account.getId());
+		byId.ifPresent(a -> a.getTags().remove(tag));
+	}
+
+	public void addZone(Account account, Zone zone) {
+		Optional<Account> byId = accountRepository.findById(account.getId());
+		byId.ifPresent(a -> a.getZones().add(zone));
+	}
+
+	public Set<Zone> getZones(Account account) {
+		Optional<Account> byId = accountRepository.findById(account.getId());
+		return byId.orElseThrow().getZones();
+	}
+
+	public void removeZone(Account account, Zone zone) {
+		Optional<Account> byId = accountRepository.findById(account.getId());
+		byId.ifPresent(a -> a.getZones().remove(zone));
 	}
 }

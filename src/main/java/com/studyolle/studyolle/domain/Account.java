@@ -1,15 +1,11 @@
 package com.studyolle.studyolle.domain;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Lob;
+import javax.persistence.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -69,6 +65,12 @@ public class Account {
 	private boolean studyUpdatedByWeb = true;
 	
 	private LocalDateTime emailCheckTokenGeneratedAt;
+
+	@ManyToMany
+	private Set<Tag> tags = new HashSet<>();
+
+	@ManyToMany
+	private Set<Zone> zones = new HashSet<>();
 
 	public void generateEmailCheckToken() {
 		this.emailCheckToken  = UUID.randomUUID().toString();
