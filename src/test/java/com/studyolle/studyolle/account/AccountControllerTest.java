@@ -13,6 +13,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import com.studyolle.studyolle.mail.EmailMessage;
+import com.studyolle.studyolle.mail.EmailService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +40,7 @@ public class AccountControllerTest {
 	private AccountRepository accountRepository;
 	
 	@MockBean
-	JavaMailSender javaMailSender;
+	EmailService emailService;
 
 	@DisplayName("Check 'sign-up' page can be displayed or not.")
 	@Test
@@ -86,7 +88,7 @@ public class AccountControllerTest {
 		assertNotNull(account);
 		assertNotEquals(account.getPassword(), "123456789");
 	    assertNotNull(account.getEmailCheckToken());
-		then(javaMailSender).should().send(any(SimpleMailMessage.class));
+		then(emailService).should().sendEmail(any(EmailMessage.class));
 	}
 	
 	
