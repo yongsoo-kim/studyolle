@@ -7,9 +7,11 @@
 <head th:fragment="head">
 	<meta charset="UTF-8">
 	<title>studyolle</title>
+	<link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR:300,400,500,700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap.min.css"/>
 	<link rel="stylesheet" href="/node_modules/font-awesome/css/font-awesome.min.css"/>
 	<link rel="stylesheet" href="/node_modules/@yaireo/tagify/dist/tagify.css"/>
+	<link rel="stylesheet" href="/node_modules/summernote/dist/summernote-bs4.css">
 	<script src="/node_modules/jquery/dist/jquery.min.js"></script>
 	<script src="/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="/node_modules/jdenticon/dist/jdenticon.min.js"></script>
@@ -21,6 +23,20 @@
 			border: 0;
 			padding: 0;
 			margin: 0;
+		}
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, "Noto Sans KR", "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+		}
+
+		body,
+		input,
+		button,
+		select,
+		optgroup,
+		textarea,
+		.tooltip,
+		.popover {
+			font-family: -apple-system, BlinkMacSystemFont, "Noto Sans KR", "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 		}
 	</style>
 </head>
@@ -55,7 +71,7 @@
 				<li class="nav-item" sec:authorize="!isAuthenticated()"><a class="nav-link" th:href="@{/login}">로그인</a></li>
 				<li class="nav-item" sec:authorize="!isAuthenticated()"><a class="nav-link" th:href="@{/sign-up}">가입</a></li>
 				<li class="nav-item" sec:authorize="isAuthenticated()"><a class="nav-link" th:href="@{/notifications}"><i class="fa fa-bell-o" aria-hidden="true"></i></a></li>
-				<li class="nav-item" sec:authorize="isAuthenticated()"><a class="nav-link btn btn-outline-primary" th:href="@{/sign-up}"><i class="fa fa-plus" aria-expanded="false"></i>스터디 개설</a></li>
+				<li class="nav-item" sec:authorize="isAuthenticated()"><a class="nav-link btn btn-outline-primary" th:href="@{/new-study}"><i class="fa fa-plus" aria-expanded="false"></i>스터디 개설</a></li>
 				<li class="nav-item dropdown" sec:authorize="isAuthenticated()">
 				<a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
 				<svg th:if="${#strings.isEmpty(account?.profileImage)}" th:data-jdenticon-value="${#authentication.name}" width="24" height="24" class="rounded border bg-light"></svg> 
