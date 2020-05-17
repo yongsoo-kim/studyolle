@@ -182,7 +182,7 @@ public class AccountService implements UserDetailsService {
 		// And... **toMany can't use Lazy loading. -> 'Tag' will be null!
 		// ** TIP**
 		// Only 'persist' status can make us use Lazy loading again -> we need to change the status.
-		Optional<Account> byId = accountRepository.findById(account.getId()); // This is Eager loading. And  'accountRepository.getOne()' is Lazy loading.
+		Optional<Account> byId = accountRepository.findById(account.getId()); // 'findById()' is Eager loading. And  'accountRepository.getOne()' is Lazy loading.
 		byId.ifPresent(a -> a.getTags().add(tag));
 	}
 
@@ -209,5 +209,14 @@ public class AccountService implements UserDetailsService {
 	public void removeZone(Account account, Zone zone) {
 		Optional<Account> byId = accountRepository.findById(account.getId());
 		byId.ifPresent(a -> a.getZones().remove(zone));
+	}
+
+	public Account getAccount(String nickname) {
+
+		Account account = accountRepository.findByNickname(nickname);
+		if (account == null) {
+			throw new IllegalArgumentException(nickname + "에 해당하는 사용자가 없습니다.");
+		}
+		return  account;
 	}
 }

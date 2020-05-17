@@ -32,38 +32,38 @@ public class Account {
 
 	@Column(unique = true)
 	private String nickname;
-	
+
 	private String password;
-	
+
 	private boolean emailVerified;
-	
+
 	private String emailCheckToken;
-	
+
 	private LocalDateTime joinedAt;
-	
+
 	private String bio;
-	
+
 	private String url;
-	
+
 	private String occupation;
-	
+
 	private String location;
-	
+
 	@Lob @Basic(fetch = FetchType.EAGER)
 	private String profileImage;
-	
+
 	private boolean studyCreatedByEmail;
-	
+
 	private boolean studyCreatedByWeb = true;
-	
+
 	private boolean studyEnrollmentResultByEmail;
-	
+
 	private boolean studyEnrollmentResultByWeb = true;
-	
+
 	private boolean studyUpdatedByEmail;
-	
+
 	private boolean studyUpdatedByWeb = true;
-	
+
 	private LocalDateTime emailCheckTokenGeneratedAt;
 
 	@ManyToMany
@@ -78,18 +78,16 @@ public class Account {
 	}
 
 	public void completeSignUp() {
-
-		this.setEmailVerified(true);
-		this.setJoinedAt(LocalDateTime.now());
-
+		this.emailVerified =  true;
+		this.joinedAt = LocalDateTime.now();
 	}
 
 	public boolean isValidToken(String token) {
 		return this.getEmailCheckToken().equals(token);
 	}
-	
+
 	public boolean canSendConfirmEmail() {
 		return this.emailCheckTokenGeneratedAt.isBefore(LocalDateTime.now().minusHours(1));
 	}
-	
+
 }

@@ -55,14 +55,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		jdbcTokenRepository.setDataSource(dataSource);
 		return jdbcTokenRepository;
 	}
-	
+
 
 	@Override
 	public void configure(WebSecurity web) throws Exception {
 		// for static files
 		web.ignoring()
-		.mvcMatchers("/node_modules/**") // for ignoring 'node_module'
-		.requestMatchers(PathRequest.toStaticResources().atCommonLocations()); // for ignoring common 'static' files from security setting.
+				.mvcMatchers("/node_modules/**") // for ignoring 'node_module'
+				.requestMatchers(PathRequest.toStaticResources().atCommonLocations()); // for ignoring common 'static' files from security setting.
 
 	}
 	

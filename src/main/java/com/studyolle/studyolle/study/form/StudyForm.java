@@ -1,5 +1,6 @@
 package com.studyolle.studyolle.study.form;
 
+import lombok.Builder;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
@@ -9,6 +10,7 @@ import javax.validation.constraints.Pattern;
 @Data
 public class StudyForm {
 
+    //TODO: I need to allow space maybe?
     @NotBlank
     @Length(min = 2, max = 20)
     @Pattern(regexp = "^[ㄱ-ㅎ가-힣a-z0-9_-]{2,20}$")

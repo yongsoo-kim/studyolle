@@ -4,7 +4,6 @@ import com.studyolle.studyolle.study.StudyRepository;
 import com.studyolle.studyolle.study.form.StudyForm;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 

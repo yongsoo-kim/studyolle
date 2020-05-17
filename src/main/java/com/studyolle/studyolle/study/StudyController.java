@@ -13,6 +13,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.validation.Valid;
@@ -26,8 +27,9 @@ public class StudyController {
     private final StudyService studyService;
     private final ModelMapper modelMapper;
     private final StudyFormValidator studyFormValidator;
+    private final StudyRepository studyRepository;
 
-    @InitBinder
+    @InitBinder("studyForm")
     public void studyFormInitBinder(WebDataBinder webDataBinder){
         webDataBinder.addValidators(studyFormValidator);
     }
@@ -40,9 +42,10 @@ public class StudyController {
     }
 
     @PostMapping("/new-study")
-    public String newStudySubmit(@CurrentUser Account account, @Valid StudyForm studyForm, Errors errors){
+    public String newStudySubmit(@CurrentUser Account account, @Valid StudyForm studyForm, Errors errors, Model model){
 
         if(errors.hasErrors()){
+            model.addAttribute(account);
             return "study/form";
         }
 //        You can also do like this:
@@ -55,5 +58,22 @@ public class StudyController {
         return "redirect:/study/"+ URLEncoder.encode(newStudy.getPath(), StandardCharsets.UTF_8);
     }
 
+    @GetMapping("/study/{path}")
+    public String viewStudy(@CurrentUser Account account, @PathVariable String path, Model model) {
+        //study path existence check.
+        Study study = studyService.getStudy(path);
+
+        model.addAttribute("account", account);
+        model.addAttribute(studyRepository.findByPath(path));
+        return "study/view";
+    }
+
+    @GetMapping("/study/{path}/members")
+    public String viewStudyMembers(@CurrentUser Account account, @PathVariable String path, Model model) {
+        Study study = studyService.getStudy(path);
+        model.addAttribute("account", account);
+        model.addAttribute(study);
+        return "study/members";
+    }
 
 }

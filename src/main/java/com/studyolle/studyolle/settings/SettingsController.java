@@ -11,6 +11,7 @@ import com.studyolle.studyolle.settings.form.*;
 import com.studyolle.studyolle.settings.validator.Nicknamevalidator;
 import com.studyolle.studyolle.settings.validator.PasswordFormValidator;
 import com.studyolle.studyolle.tag.TagRepository;
+import com.studyolle.studyolle.tag.TagService;
 import com.studyolle.studyolle.zone.ZoneRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -47,6 +48,7 @@ public class SettingsController {
 	private final AccountService accountService;
 	private final ModelMapper modelMapper;
 	private final Nicknamevalidator nicknameValidator;
+	private final TagService tagService;
 	private final TagRepository tagRepository;
 	private final ObjectMapper objectMapper;
 	private final ZoneRepository zoneRepository;
@@ -182,18 +184,15 @@ public class SettingsController {
 	@PostMapping(TAGS + "/add")
 	@ResponseBody
 	public ResponseEntity addTag(@CurrentUser Account account, @RequestBody TagForm tagForm) {
-		String title = tagForm.getTagTitle();
+		String tagTitle = tagForm.getTagTitle();
 
 		//Same code, but using Optional
 //		Tag tag = tagRepository.findByTitle(title).orElseGet(() -> tagRepository.save(Tag.builder()
 //				.title(tagForm.getTagTitle())
 //				.build()));
         //  Tag existence check.
-		Tag tag = tagRepository.findByTitle(title);
-		if (tag == null) {
-			tag = tagRepository.save(Tag.builder().title(tagForm.getTagTitle()).build());
-		}
-
+		// .If tag exists, return it. If can't find it, create new one!
+		Tag tag = tagService.findOrCreateNew(tagTitle);
 		accountService.addTag(account, tag);
 		return ResponseEntity.ok().build();
 	}
