@@ -1,6 +1,8 @@
 package com.studyolle.studyolle.study;
 
+import com.studyolle.studyolle.account.AccountFactory;
 import com.studyolle.studyolle.account.AccountRepository;
+import com.studyolle.studyolle.domain.Account;
 import com.studyolle.studyolle.domain.Study;
 import com.studyolle.studyolle.settings.WithAccount;
 import org.junit.jupiter.api.AfterEach;
@@ -11,7 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -22,13 +24,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class StudyControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    MockMvc mockMvc;
 
     @Autowired
-    private StudyRepository studyRepository;
+    StudyRepository studyRepository;
+
+    @Autowired
+    StudyService studyService;
 
     @Autowired
     AccountRepository accountRepository;
+
+    @Autowired
+    StudyFactory studyFactory;
+
+    @Autowired
+    AccountFactory accountFactory;
 
     @AfterEach
     void afterEach() {
@@ -89,6 +100,61 @@ class StudyControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("account"))
                 .andExpect(model().attributeHasErrors("studyForm"));
+    }
+
+    @Test
+    @WithAccount("yongsoo")
+    @DisplayName("Study view test")
+    void viewStudy() throws Exception {
+        Study study = new Study();
+        study.setPath("test-path");
+        study.setTitle("test study");
+        study.setShortDescription("short description");
+        study.setFullDescription("<p>full description</p>");
+
+        Account yongsoo = accountRepository.findByNickname("yongsoo");
+        studyService.createNewStudy(study, yongsoo);
+
+        mockMvc.perform(get("/study/test-path"))
+                .andExpect(view().name("study/view"))
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("study"));
+
+    }
+
+
+    @Test
+    @WithAccount("yongsoo")
+    @DisplayName("study join test")
+    void joinStudy() throws Exception {
+        Account testuser = accountFactory.createAccount("testuser");
+        Study study = studyFactory.createStudy("test-study", testuser);
+
+        mockMvc.perform((get("/study/" + study.getPath() + "/join")))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/" + study.getPath() + "/members"));
+
+        Account yongsoo = accountRepository.findByNickname("yongsoo");
+        Study savedStudy = studyRepository.findByPath("test-study");
+        assertTrue(savedStudy.getMembers().contains(yongsoo));
+    }
+
+
+    @Test
+    @WithAccount("yongsoo")
+    @DisplayName("study join test")
+    void leaveStudy() throws Exception {
+        Account testuser = accountFactory.createAccount("testuser");
+        Study study = studyFactory.createStudy("test-study", testuser);
+        Account yongsoo = accountRepository.findByNickname("yongsoo");
+        studyService.addMember(study, yongsoo);
+
+        mockMvc.perform((get("/study/" + study.getPath() + "/leave")))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/" + study.getPath() + "/members"));
+
+        Study savedStudy = studyRepository.findByPath("test-study");
+        assertFalse(savedStudy.getMembers().contains(yongsoo));
     }
 
 
