@@ -63,7 +63,6 @@ class StudySettingControllerTest extends StudyControllerTest {
                 .andExpect(flash().attributeExists("message"));
     }
 
-
     @Test
     @WithAccount("yongsoo")
     @DisplayName("Study update -> fail")
