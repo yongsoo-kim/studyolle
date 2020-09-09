@@ -1,0 +1,105 @@
+package com.studyolle.studyolle.modules.study;
+
+
+import com.studyolle.studyolle.infra.AbstractContainerBaseTest;
+import com.studyolle.studyolle.infra.MockMvcTest;
+import com.studyolle.studyolle.modules.account.Account;
+import com.studyolle.studyolle.modules.account.AccountFactory;
+import com.studyolle.studyolle.modules.account.AccountRepository;
+import com.studyolle.studyolle.modules.account.WithAccount;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@MockMvcTest
+class StudySettingControllerTest extends AbstractContainerBaseTest {
+
+    @Autowired
+    MockMvc mockMvc;
+
+    @Autowired
+    StudyRepository studyRepository;
+
+    @Autowired
+    AccountRepository accountRepository;
+
+    @Autowired
+    StudyFactory studyFactory;
+
+    @Autowired
+    AccountFactory accountFactory;
+
+    @Test
+    @WithAccount("yongsoo")
+    @DisplayName("Study description form page -> success")
+    void updateDescriptionForm_success() throws Exception {
+        Account yongsoo = accountRepository.findByNickname("yongsoo");
+        Study study = studyFactory.createStudy("test-study", yongsoo);
+
+        mockMvc.perform(get("/study/" + study.getPath() + "/settings/description"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("study/settings/description"))
+                .andExpect(model().attributeExists("studyDescriptionForm"))
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("study"));
+    }
+
+
+    @Test
+    @WithAccount("yongsoo")
+    @DisplayName("Study description form page -> fail (No auth)")
+    void updateDescriptionForm_fail() throws Exception {
+        Account testuser = accountRepository.findByNickname("testuser");
+        Study study = studyFactory.createStudy("test-study", testuser);
+
+        mockMvc.perform(get("/study/" + study.getPath() + "/settings/description"))
+                .andExpect(status().is4xxClientError());
+    }
+
+
+    @Test
+    @WithAccount("yongsoo")
+    @DisplayName("Study update -> Success")
+    void updateDescription_success() throws Exception {
+        Account yongsoo = accountRepository.findByNickname("yongsoo");
+        Study study = studyFactory.createStudy("test-study", yongsoo);
+
+        String settingsDescriptionUrl = "/study/" + study.getPath() + "/settings/description";
+        mockMvc.perform(post(settingsDescriptionUrl)
+                .param("shortDescription", "short description...")
+                .param("fullDescription", "full description...")
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(settingsDescriptionUrl))
+                .andExpect(flash().attributeExists("message"));
+    }
+
+    @Test
+    @WithAccount("yongsoo")
+    @DisplayName("Study update -> fail")
+    void updateDescription_fail() throws Exception {
+        Account yongsoo = accountRepository.findByNickname("yongsoo");
+        Study study = studyFactory.createStudy("test-study", yongsoo);
+
+        String settingsDescriptionUrl = "/study/" + study.getPath() + "/settings/description";
+        mockMvc.perform(post(settingsDescriptionUrl)
+                .param("shortDescription", "")
+                .param("fullDescription", "full description...")
+                .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(model().hasErrors())
+                .andExpect(model().attributeExists("studyDescriptionForm"))
+                .andExpect(model().attributeExists("study"))
+                .andExpect(model().attributeExists("account"));
+    }
+
+
+}

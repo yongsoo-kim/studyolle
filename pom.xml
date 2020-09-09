@@ -47,11 +47,11 @@
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<scope>runtime</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>com.h2database</groupId>-->
+<!--			<artifactId>h2</artifactId>-->
+<!--			<scope>runtime</scope>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
@@ -101,7 +101,38 @@
 			<version>2.3.7</version>
 		</dependency>
 
-    </dependencies>
+
+		<!-- https://mvnrepository.com/artifact/com.tngtech.archunit/archunit-junit5-engine -->
+		<!-- This is for domain dependency arrangement -->
+		<dependency>
+			<groupId>com.tngtech.archunit</groupId>
+			<artifactId>archunit-junit5-engine</artifactId>
+			<version>0.13.1</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.testcontainers/junit-jupiter -->
+		<!-- For unit test and test DB, docker will be used. -->
+		<!-- Don't forget to make "test>resources" folder -->
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>1.13.0</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>1.13.0</version>
+			<scope>test</scope>
+		</dependency>
+
+
+
+
+
+	</dependencies>
 
 	<build>
 		<plugins>
